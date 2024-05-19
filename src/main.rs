@@ -15,14 +15,22 @@ async fn main() -> anyhow::Result<()> {
        4. using `tcp.write()` to write data from buffer into conn.
     */
     let server = TcpListener::bind("127.0.0.1:42069").await?;
-    let (mut tcp, _) = server.accept().await?;
-    let mut buffer = [0u8; 16];
     loop {
-        let n = tcp.read(&mut buffer).await?;
-        if n == 0 {
-            break;
+        let (mut tcp, _) = server.accept().await?;
+        let mut buffer = [0u8; 16];
+        loop {
+            let n = tcp.read(&mut buffer).await?;
+            if n == 0 {
+                break;
+            }
+            // Convert to String.
+            let mut line = String::from_utf8(buffer[..n].to_vec())?;
+            line.pop();
+            line.pop();
+            line.push_str(" ❤\n");
+            // Convert back to Byte slice.
+            let _ = tcp.write(line.as_bytes()).await?;
         }
-        let _ = tcp.write(&buffer[..n]).await?;
     }
     Ok(())
 }
