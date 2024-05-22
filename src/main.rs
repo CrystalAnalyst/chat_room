@@ -10,9 +10,7 @@ async fn main() -> anyhow::Result<()> {
     // The Server's logic
     /*
        1. bind address.
-       2. accept conn.
-       3. using `tcp.read()` to read data into local buffer.
-       4. using `tcp.write()` to write data from buffer into conn.
+       2. use tokio::spwan to accept conn concurrently.
     */
     let server = TcpListener::bind("127.0.0.1:42069").await?;
     loop {
@@ -23,6 +21,8 @@ async fn main() -> anyhow::Result<()> {
     }
 }
 
+/// using `tcp.read()` to read data into local buffer.
+/// using `tcp.write()` to write data from buffer into conn.s
 async fn handle_user(mut tcp: TcpStream) -> anyhow::Result<()> {
     let (reader, writer) = tcp.split();
     let mut stream = FramedRead::new(reader, LinesCodec::new());
